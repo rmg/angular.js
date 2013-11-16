@@ -19,13 +19,25 @@ function $ControllerProvider() {
    * @ngdoc function
    * @name ng.$controllerProvider#register
    * @methodOf ng.$controllerProvider
-   * @param {string|Object} name Controller name, or an object map of controllers where the keys are
-   *    the names and the values are the constructors.
-   * @param {Function|Array} constructor Controller constructor fn (optionally decorated with DI
-   *    annotations in the array notation).
+   * @param {string|Object|Array|Function} name Controller name, an object map
+   *    of controllers where the keys are the names and the values are the
+   *    constructors, a constructor with a name, or DI annotated array of
+   *    named functions.
+   * @param {Function|Array} constructor Controller constructor fn (optionally
+   *    decorated with DI annotations in the array notation).
    */
   this.register = function(name, constructor) {
     assertNotHasOwnProperty(name, 'controller');
+    if (arguments.length == 1) {
+      if (isFunction(name)) {
+        constructor = name;
+        name = constructor;
+        controllers[name] = constructor;
+      } else if (isArray(name)) {
+        constructor = name;
+        name = constructor[constructor.length - 1].name;
+      }
+    }
     if (isObject(name)) {
       extend(controllers, name);
     } else {
